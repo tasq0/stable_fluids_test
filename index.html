@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script type="x-shader/x-vertex" id="vshader">
+      varying vec3 pos;
+      void main()
+      {
+        pos = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    </script>
+    <script type="x-shader/x-fragment" id="fshader">
+      varying vec3 pos;
+      vec2 random2(vec2 st){
+          st = vec2( dot(st,vec2(127.1,311.7)),
+                    dot(st,vec2(269.5,183.3)) );
+          return -1.0 + 2.0*fract(sin(st)*43758.5453123);
+      }
+      float noise(vec2 p, float scale) {
+        //vec2 st = sin(p * 3.1415) / scale;
+        vec2 st = p / scale;
+        vec2 i = floor(st);
+        vec2 f = fract(st);
+
+        vec2 u = f*f*(3.0-2.0*f);
+
+        return mix( mix( dot( random2(i + vec2(0.0,0.0) ), f - vec2(0.0,0.0) ),
+                         dot( random2(i + vec2(1.0,0.0) ), f - vec2(1.0,0.0) ), u.x),
+                    mix( dot( random2(i + vec2(0.0,1.0) ), f - vec2(0.0,1.0) ),
+                         dot( random2(i + vec2(1.0,1.0) ), f - vec2(1.0,1.0) ), u.x), u.y);
+      }
+      void main()
+      {
+        gl_FragColor = vec4(vec3((noise(pos.xy, 40.0) + 1.0) / 2.0), 1.0);
+      }
+    </script>
+    <title>Stable Fluids</title>
+    <script src="js/three.min.js" charset="utf-8"></script>
+    <script src="js/ModelCanvas.js" charset="utf-8"></script>
+    <script src="js/Solver.js" charset="utf-8"></script>
+  </head>
+  <body>
+
+  <script type="text/javascript">
+    var modelCanvas = new ModelCanvas(400, 400);
+    modelCanvas.init();
+  </script>
+  <script src="js/Panel.js" charset="utf-8"></script>
+  </body>
+</html>
