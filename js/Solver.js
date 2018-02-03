@@ -24,7 +24,7 @@ var Solver = function(w, h, N) {
 Solver.prototype.init = function (vis, diff, dt) {
   this.viscosity = vis;
   this.diffusion = diff;
-  this.dt = dt; //stepごとに決めたいが
+  this.dt = dt;
 
   //後でここをユーザ入力にしたい
   this.forcex = [];
@@ -59,7 +59,12 @@ Solver.prototype.init = function (vis, diff, dt) {
     }
   }
 
-  this.source[5][5] = 0.99;
+  this.source[50][50] = 5.0;
+  this.source[49][50] = 5.0;
+  this.source[50][49] = 5.0;
+  this.source[49][49] = 5.0;
+  this.forcex[40][40] = 300.0;
+  this.forcey[40][40] = 300.0;
 };
 
 Solver.prototype.step = function () {
@@ -133,8 +138,8 @@ Solver.prototype.project = function (x1, y1, p, div) {
 
   for (var i = 1; i < this.N + 1; i++) {
     for (var j = 1; j < this.N + 1; j++) {
-      x1[i][j] -= 0.5 * this.N * (p[i+1][j] - p[i-1][j]);
-      y1[i][j] -= 0.5 * this.N * (p[i][j+1] - p[i][j-1]);
+      x1[i][j] -= 0.5 * this.N * (p[i][j+1] - p[i][j-1]);
+      y1[i][j] -= 0.5 * this.N * (p[i+1][j] - p[i-1][j]);
     }
   }
   this.setBoundary(this.N, 1, x1);
@@ -146,22 +151,22 @@ Solver.prototype.advect = function (b, d, d0, u, v) {
   var dt0 = this.dt * this.N;
   for (var i = 1; i < this.N + 1; i++) {
     for (var j = 1; j < this.N + 1; j++) {
-      var x = i - dt0 * u[i][j];
-      var y = j - dt0 * v[i][j];
+      var x = j - dt0 * u[i][j];
+      var y = i - dt0 * v[i][j];
       if(x<0.5) x = 0.5;
       if(x>this.N+0.5) x = this.N + 0.5;
-      var i0 = Math.floor(x);
-      var i1 = i0 + 1;
+      var j0 = Math.floor(x);
+      var j1 = j0 + 1;
       if(y<0.5) y = 0.5;
       if(y>this.N+0.5) y = this.N + 0.5;
-      var j0 = Math.floor(y);
-      var j1 = j0 + 1;
-      var s1 = x - i0;
+      var i0 = Math.floor(y);
+      var i1 = i0 + 1;
+      var s1 = x - j0;
       var s0 = 1.0 - s1;
-      var t1 = y - j0;
-      var t0 = 1 - t1;
-      d[i][j] = s0 * (t0 * d0[i0][j0] + t1 * d0[i0][j1])
-              + s1 * (t0 * d0[i1][j0] + t1 * d0[i1][j1]);
+      var t1 = y - i0;
+      var t0 = 1.0 - t1;
+      d[i][j] = s0 * (t0 * d0[i0][j0] + t1 * d0[i1][j0])
+              + s1 * (t0 * d0[i0][j1] + t1 * d0[i1][j1]);
       //双線形補間
     }
   }
