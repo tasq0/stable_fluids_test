@@ -5,9 +5,15 @@ var ModelCanvas = function(w, h) {
   this.scene = null;
   this.camera = null;
 
+  this.geom = null;
+  this.material = null;
+  this.plane = null;
+
   this.renderer = null;
 
-  this.renderTarget = null;
+  this.solver = null;
+
+  this.dens = null;
 }
 
 ModelCanvas.prototype.init = function () {
@@ -22,25 +28,46 @@ ModelCanvas.prototype.init = function () {
 
   document.body.appendChild(this.renderer.domElement);
 
-  this.initScene();
+  this.solver = new Solver(this.width, this.height, 8);
+  this.solver.init(0.01, 0.01, 0.3);
+  this.dens = this.solver.step();
 
-  //this.setInitialDensity();
+  this.initScene();
 
   this.updateCanvas();
 };
 
 
 ModelCanvas.prototype.initScene = function () {
-  var geom = new THREE.PlaneGeometry(this.width, this.height);
-  var material = new THREE.ShaderMaterial({
-    vertexShader: document.getElementById('vshader').textContent,
-    fragmentShader: document.getElementById('fshader').textContent
-  })
-  var plane = new THREE.Mesh(geom, material);
-  this.scene.add(plane);
+  this.geom = new THREE.PlaneGeometry(this.width, this.height, 10, 10);
+  this.material = new THREE.MeshBasicMaterial({ vertexColors: THREE.FaceColors });
+  for (var i = 0; i < 10; i++) {
+    for (var j = 0; j < 10; j++) {
+      this.geom.faces[2*(10 * i + j)].color = new THREE.Color(this.dens[i][j], 0.0, 0.0);
+      this.geom.faces[2*(10 * i + j) + 1].color = new THREE.Color(this.dens[i][j], 0.0, 0.0);
+    }
+  }
+  this.plane = new THREE.Mesh(this.geom, this.material);
+  this.scene.add(this.plane);
 };
+
+ModelCanvas.prototype.updateScene = function () {
+  for (var i = 0; i < 10; i++) {
+    for (var j = 0; j < 10; j++) {
+      this.geom.faces[2*(10 * i + j)].color.setRGB(this.dens[i][j], 0.0, 0.0);
+      this.geom.faces[2*(10 * i + j) + 1].color.setRGB(this.dens[i][j], 0.0, 0.0);
+    }
+  }
+};
+
+var num = 0;
 
 ModelCanvas.prototype.updateCanvas = function () {
   requestAnimationFrame(this.updateCanvas.bind(this));
   this.renderer.render(this.scene, this.camera);
+  this.dens = this.solver.step();
+  this.updateScene();
+  this.geom.colorsNeedUpdate = true;
+  if(num < 100) console.log(this.dens);
+  num++;
 };
