@@ -65,6 +65,9 @@ Solver.prototype.init = function (vis, diff, dt) {
   this.source[49][49] = 5.0;
   this.forcex[40][40] = 300.0;
   this.forcey[40][40] = 300.0;
+
+  this.forcex[80][70] = -300.0;
+  this.forcey[80][70] = -300.0;
 };
 
 Solver.prototype.step = function () {
