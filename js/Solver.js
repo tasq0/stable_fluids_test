@@ -59,8 +59,7 @@ Solver.prototype.init = function (vis, diff, dt) {
     }
   }
 
-  this.source[3][4] = 0.99;
-  //this.forcex[2][2] = 0.2;
+  this.source[5][5] = 0.99;
 };
 
 Solver.prototype.step = function () {
